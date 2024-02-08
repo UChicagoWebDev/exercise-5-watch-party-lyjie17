@@ -173,14 +173,60 @@ def room(room_id):
 # -------------------------------- API ROUTES ----------------------------------
 
 # POST to change the user's name
-@app.route('/api/user/name')
+@app.route('/api/user/name', methods=['POST'])
 def update_username():
-    return {}, 403
+    print("update username")
+    user = get_user_from_cookie(request)
+    if user is None: return {}, 403
+
+    user_id = user['id']
+    new_username = request.json.get('name')
+    query_db('update users set name = ? WHERE id = ?', [new_username, user_id], one=True)
+    return {}, 200
 
 # POST to change the user's password
+@app.route('/api/user/password', methods=['POST'])
+def update_password():
+    print("update password")
+    user = get_user_from_cookie(request)
+    if user is None: return {}, 403
+
+    user_id = user['id']
+    new_password = request.json.get('password')
+    query_db('update users set password = ? WHERE id = ?', [new_password, user_id], one=True)
+    return {}, 200
 
 # POST to change the name of a room
+@app.route('/api/rooms/<int:room_id>', methods=['POST'])
+def update_room_name(room_id):
+    print("update room name")
+    user = get_user_from_cookie(request)
+    if user is None: return {}, 403
+
+    new_room_name = request.json.get('name')
+    query_db('update rooms set name = ? WHERE id = ?', [new_room_name, room_id], one=True)
+    return {}, 200
 
 # GET to get all the messages in a room
+@app.route('/api/rooms/<int:room_id>/messages', methods=['GET'])
+def get_messages(room_id):
+    print("get messages")
+    user = get_user_from_cookie(request)
+    if user is None: return {}, 403
+
+    query = 'select m.id, m.room_id, m.body, u.name as user_name from messages m left join users u on m.user_id = u.id where m.room_id = ?'
+    messages = query_db(query, [room_id], one=True)
+    return jsonify([dict(message) for message in messages])
 
 # POST to post a new message to a room
+@app.route('/api/rooms/<int:room_id>/messages', methods=['POST'])
+def post_message(room_id):
+    print("get messages")
+    user = get_user_from_cookie(request)
+    if user is None: return {}, 403
+
+    user_id = user['id']
+    body = request.json.get('body')
+    query = 'INSERT INTO messages (user_id, room_id, body) VALUES (?, ?, ?)'
+    query_db(query, [user_id, room_id, body], one=True)
+    return {}, 200
