@@ -215,8 +215,8 @@ def get_messages(room_id):
     if user is None: return {}, 403
 
     query = 'select m.id, m.room_id, m.body, u.name as user_name from messages m left join users u on m.user_id = u.id where m.room_id = ?'
-    messages = query_db(query, [room_id], one=True)
-    return jsonify([dict(message) for message in messages])
+    messages = query_db(query, [room_id])
+    return jsonify([dict(message) for message in messages]), 200
 
 # POST to post a new message to a room
 @app.route('/api/rooms/<int:room_id>/messages', methods=['POST'])
