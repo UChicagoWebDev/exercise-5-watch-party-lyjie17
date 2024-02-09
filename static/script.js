@@ -136,6 +136,13 @@ function switchHide() {
   document.querySelector('.roomData .edit').classList.remove('hide'); // remove `hide` from the `edit`
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+  const chatHistory = document.querySelector('.messages');
+  if (chatHistory) {
+      chatHistory.innerHTML = '';
+  }
+});
+
 // for posting message
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('comment_form').addEventListener('submit', function(e) {
